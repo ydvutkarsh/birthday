@@ -20,5 +20,16 @@ class UserSeeder extends Seeder
                 'status' => 'active',
             ]
         );
+
+        User::updateOrCreate(
+            ['username' => 'akash'],
+            [
+                'name' => 'Akash',
+                'email' => 'akash@example.com',
+                'password' => Hash::make('akash0909'),
+                'role' => 'admin',
+                'status' => 'active',
+            ]
+        );
     }
 }
