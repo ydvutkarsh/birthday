@@ -74,32 +74,87 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const player = document.querySelector('[data-player]');
   if (player) {
-    const iframe = player.querySelector('[data-youtube]');
+    const videoMount = player.querySelector('[data-youtube]');
+    const seek = player.querySelector('[data-seek]');
+    const progress = player.querySelector('.player-progress > span');
+    const currentTime = player.querySelector('[data-current-time]');
+    const totalTime = player.querySelector('[data-total-time]');
     const songs = window.storySongs || [];
     let index = 0;
     let playing = false;
-    const load = () => {
+    let youtubePlayer = null;
+    let playerReady = false;
+    let pollTimer = null;
+    let autoplayWhenReady = false;
+    const formatTime = (seconds) => {
+      const value = Math.max(0, Math.floor(Number(seconds) || 0));
+      return `${Math.floor(value / 60)}:${String(value % 60).padStart(2, '0')}`;
+    };
+    const updateProgress = () => {
+      if (!youtubePlayer || !playerReady) return;
+      const duration = youtubePlayer.getDuration() || 0;
+      const position = youtubePlayer.getCurrentTime() || 0;
+      if (duration > 0) {
+        seek.max = duration;
+        seek.value = position;
+        progress.style.width = `${(position / duration) * 100}%`;
+        totalTime.textContent = formatTime(duration);
+      }
+      currentTime.textContent = formatTime(position);
+    };
+    const startProgressPolling = () => {
+      clearInterval(pollTimer);
+      pollTimer = setInterval(updateProgress, 500);
+    };
+    const load = (autoplay = false) => {
       const song = songs[index];
       if (!song) return;
-      iframe.src = song.video
-        ? `https://www.youtube.com/embed/${song.video}?enablejsapi=1&playsinline=1&rel=0`
-        : `https://www.youtube.com/embed/videoseries?list=${song.playlist}&enablejsapi=1&playsinline=1&rel=0`;
+      autoplayWhenReady = autoplay;
       player.querySelector('[data-song-title]').textContent = song.title;
+      seek.value = 0;
+      progress.style.width = '0%';
+      currentTime.textContent = '0:00';
+      totalTime.textContent = '0:00';
+      if (!youtubePlayer || !playerReady) return;
+      if (song.video) autoplay ? youtubePlayer.loadVideoById(song.video) : youtubePlayer.cueVideoById(song.video);
+      else autoplay ? youtubePlayer.loadPlaylist({ listType: 'playlist', list: song.playlist }) : youtubePlayer.cuePlaylist({ listType: 'playlist', list: song.playlist });
     };
-    const post = (command) => iframe.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: command, args: [] }), '*');
+    const createYoutubePlayer = () => {
+      if (youtubePlayer || !window.YT?.Player) return;
+      const song = songs[index];
+      youtubePlayer = new YT.Player(videoMount, {
+        width: '1', height: '1', videoId: song?.video || undefined,
+        playerVars: { autoplay: 0, controls: 0, rel: 0, playsinline: 1, origin: window.location.origin, listType: song?.playlist && !song?.video ? 'playlist' : undefined, list: song?.playlist || undefined },
+        events: {
+          onReady: (event) => { playerReady = true; startProgressPolling(); if (autoplayWhenReady) event.target.playVideo(); },
+          onStateChange: (event) => {
+            if (event.data === YT.PlayerState.PLAYING) playing = true;
+            if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) playing = false;
+            player.querySelector('[data-play]').textContent = playing ? '\u23f8' : '\u25b6';
+          }
+        }
+      });
+    };
     const start = () => {
-      if (!iframe.src || iframe.src === 'about:blank') load();
-      setTimeout(() => post('playVideo'), 300);
-      playing = true;
-      player.querySelector('[data-play]').textContent = '\u23f8';
+      autoplayWhenReady = true;
+      createYoutubePlayer();
+      if (playerReady) youtubePlayer.playVideo();
     };
+    seek?.addEventListener('input', () => {
+      const value = Number(seek.value);
+      progress.style.width = seek.max > 0 ? `${(value / Number(seek.max)) * 100}%` : '0%';
+      currentTime.textContent = formatTime(value);
+    });
+    seek?.addEventListener('change', () => { if (playerReady) youtubePlayer.seekTo(Number(seek.value), true); });
     document.querySelectorAll('[data-start-story]').forEach((button) => button.addEventListener('click', start));
     player.querySelector('[data-play]')?.addEventListener('click', () => {
-      if (!playing) start();
-      else { post('pauseVideo'); playing = false; player.querySelector('[data-play]').textContent = '\u25b6'; }
+      if (!playerReady || !playing) start();
+      else youtubePlayer.pauseVideo();
     });
-    player.querySelector('[data-prev]')?.addEventListener('click', () => { index = (index - 1 + songs.length) % songs.length; load(); start(); });
-    player.querySelector('[data-next]')?.addEventListener('click', () => { index = (index + 1) % songs.length; load(); start(); });
+    player.querySelector('[data-prev]')?.addEventListener('click', () => { index = (index - 1 + songs.length) % songs.length; load(true); createYoutubePlayer(); });
+    player.querySelector('[data-next]')?.addEventListener('click', () => { index = (index + 1) % songs.length; load(true); createYoutubePlayer(); });
+    if (window.YT?.Player) createYoutubePlayer();
+    else window.onYouTubeIframeAPIReady = createYoutubePlayer;
   }
 
   document.querySelector('[data-sidebar-toggle]')?.addEventListener('click', () => document.querySelector('.studio-sidebar')?.classList.toggle('open'));
