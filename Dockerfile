@@ -3,12 +3,17 @@ FROM php:8.2-cli
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
+    ca-certificates \
+    libcurl4-openssl-dev \
     libzip-dev \
-    && docker-php-ext-install pdo_mysql zip
+    && docker-php-ext-install curl pdo_mysql zip
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
+
+# Render captures container stderr/stdout; keep Laravel errors visible there.
+ENV LOG_STACK=stderr
 
 COPY . .
 

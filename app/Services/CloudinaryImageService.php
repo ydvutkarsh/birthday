@@ -16,7 +16,7 @@ class CloudinaryImageService
     /**
      * @return array{url: string, public_id: string}
      */
-    public function upload(UploadedFile $file, string $folder): array
+    public function upload(UploadedFile $file, string $folder, ?string $context = null): array
     {
         try {
             $response = $this->api()->upload($file->getRealPath() ?: $file->getPathname(), [
@@ -36,17 +36,11 @@ class CloudinaryImageService
 
             return ['url' => $url, 'public_id' => $publicId];
         } catch (CloudinaryImageException $exception) {
-            Log::error('Cloudinary image upload failed.', [
-                'folder' => $folder,
-                'exception' => $exception,
-            ]);
+            $this->logUploadFailure($exception, $file, $folder, $context);
 
             throw $exception;
         } catch (Throwable $exception) {
-            Log::error('Cloudinary image upload failed.', [
-                'folder' => $folder,
-                'exception' => $exception,
-            ]);
+            $this->logUploadFailure($exception, $file, $folder, $context);
 
             throw new CloudinaryImageException(
                 'The image could not be uploaded to Cloudinary. Please try again.',
@@ -69,7 +63,10 @@ class CloudinaryImageService
         } catch (Throwable $exception) {
             Log::error('Cloudinary image deletion failed.', [
                 'public_id' => $publicId,
-                'exception' => $exception,
+                'exception_message' => $this->safeExceptionMessage($exception),
+                'exception_class' => $exception::class,
+                'exception_file' => $exception->getFile(),
+                'exception_line' => $exception->getLine(),
             ]);
 
             throw new CloudinaryImageException(
@@ -104,5 +101,36 @@ class CloudinaryImageService
         ]));
 
         return $this->uploadApi;
+    }
+
+    private function logUploadFailure(
+        Throwable $exception,
+        UploadedFile $file,
+        string $folder,
+        ?string $context,
+    ): void {
+        Log::error('Cloudinary image upload failed.', [
+            'exception_message' => $this->safeExceptionMessage($exception),
+            'exception_class' => $exception::class,
+            'exception_file' => $exception->getFile(),
+            'exception_line' => $exception->getLine(),
+            'controller' => $context,
+            'upload_folder' => $folder,
+            'uploaded_filename' => $file->getClientOriginalName(),
+            'uploaded_mime_type' => $file->getMimeType(),
+        ]);
+    }
+
+    private function safeExceptionMessage(Throwable $exception): string
+    {
+        $message = $exception->getMessage();
+
+        foreach ([config('services.cloudinary.api_key'), config('services.cloudinary.api_secret')] as $secret) {
+            if (filled($secret)) {
+                $message = str_replace($secret, '[redacted]', $message);
+            }
+        }
+
+        return $message;
     }
 }

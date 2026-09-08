@@ -14,7 +14,7 @@ trait HandlesUploads
      */
     protected function upload(?UploadedFile $file, string $directory): ?array
     {
-        return $file ? app(CloudinaryImageService::class)->upload($file, $directory) : null;
+        return $file ? app(CloudinaryImageService::class)->upload($file, $directory, static::class) : null;
     }
 
     protected function removeUpload(?string $path, ?string $publicId = null): void
