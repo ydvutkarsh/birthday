@@ -13,7 +13,7 @@
 <body class="studio-body">
     <div class="studio-shell">
         <aside class="studio-sidebar">
-            <div class="studio-logo">O<span>♥</span>S <small>STUDIO</small></div>
+            <div class="studio-logo">Om<span>♡</span>ja <small>STUDIO</small></div>
             <div class="sidebar-label">Curate the feeling</div>
             <nav class="studio-nav">
                 <a class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"

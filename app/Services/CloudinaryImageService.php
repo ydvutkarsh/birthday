@@ -143,7 +143,7 @@ class CloudinaryImageService
             ],
         ]);
 
-        $this->uploadApi = new UploadApi();
+        $this->uploadApi = new UploadApi;
 
         return $this->uploadApi;
     }

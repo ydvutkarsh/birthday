@@ -31,7 +31,15 @@ class MemoryController extends Controller
         try {
             $this->save($request, $memory);
         } catch (CloudinaryImageException $exception) {
-            return back()->withInput()->withErrors(['cover_image' => $exception->getMessage()]);
+            return back()->withInput()->withErrors([
+                'cover_image' => 'The memory image could not be uploaded. Please try again.',
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withInput()->withErrors([
+                'cover_image' => 'The memory could not be saved. Please try again.',
+            ]);
         }
 
         return redirect()->route('admin.memories.index')->with('success', 'Memory created.');
@@ -47,7 +55,15 @@ class MemoryController extends Controller
         try {
             $this->save($request, $memory);
         } catch (CloudinaryImageException $exception) {
-            return back()->withInput()->withErrors(['cover_image' => $exception->getMessage()]);
+            return back()->withInput()->withErrors([
+                'cover_image' => 'The memory image could not be uploaded. Please try again.',
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withInput()->withErrors([
+                'cover_image' => 'The memory could not be saved. Please try again.',
+            ]);
         }
 
         return redirect()->route('admin.memories.index')->with('success', 'Memory updated.');
@@ -61,7 +77,15 @@ class MemoryController extends Controller
                 $this->removeUpload($image->image, $image->image_public_id);
             }
         } catch (CloudinaryImageException $exception) {
-            return back()->withErrors(['cover_image' => $exception->getMessage()]);
+            return back()->withErrors([
+                'cover_image' => 'The memory images could not be removed. Please try again.',
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withErrors([
+                'cover_image' => 'The memory images could not be removed. Please try again.',
+            ]);
         }
 
         $memory->delete();

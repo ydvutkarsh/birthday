@@ -16,20 +16,13 @@ class BirthdayProfileController extends Controller
     public function edit()
     {
         return view('admin.profile', [
-            'profile' => BirthdayProfile::firstOrCreate(
-                ['id' => 1],
-                ['name' => 'My Love']
-            )
+            'profile' => BirthdayProfile::firstOrCreate(['id' => 1], ['name' => 'My Love']),
         ]);
     }
 
     public function update(Request $request)
     {
-        $profile = BirthdayProfile::firstOrCreate(
-            ['id' => 1],
-            ['name' => 'My Love']
-        );
-
+        $profile = BirthdayProfile::firstOrCreate(['id' => 1], ['name' => 'My Love']);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'nickname' => ['nullable', 'string', 'max:100'],
@@ -43,55 +36,35 @@ class BirthdayProfileController extends Controller
 
         $newAssets = [];
         $oldAssets = [];
+        $failedField = 'profile_image';
 
         try {
             foreach (['profile_image', 'cover_image'] as $field) {
                 if ($request->hasFile($field)) {
-                    $asset = $this->upload(
-                        $request->file($field),
-                        'birthday/profile'
-                    );
-
+                    $failedField = $field;
+                    $asset = $this->upload($request->file($field), 'birthday/profile');
                     $newAssets[] = $asset;
-
-                    $oldAssets[$field] = [
-                        $profile->{$field},
-                        $profile->{$field . '_public_id'}
-                    ];
-
+                    $oldAssets[$field] = [$profile->{$field}, $profile->{$field.'_public_id'}];
                     $data[$field] = $asset['url'];
-                    $data[$field . '_public_id'] = $asset['public_id'];
+                    $data[$field.'_public_id'] = $asset['public_id'];
                 }
             }
 
             $profile->update($data);
-
         } catch (CloudinaryImageException $exception) {
-
             $this->cleanupUploadedAssets($newAssets);
 
-            dd([
-                'message' => $exception->getMessage(),
+            $label = $failedField === 'cover_image' ? 'cover image' : 'profile image';
 
-                'previous_message' => $exception->getPrevious()
-                    ? $exception->getPrevious()->getMessage()
-                    : null,
-
-                'previous_class' => $exception->getPrevious()
-                    ? get_class($exception->getPrevious())
-                    : null,
-
-                'exception_class' => get_class($exception),
+            return back()->withInput()->withErrors([
+                $failedField => "The {$label} could not be uploaded. Please try again.",
             ]);
-
         } catch (Throwable $exception) {
-
             $this->cleanupUploadedAssets($newAssets);
+            report($exception);
 
-            dd([
-                'unexpected_error' => true,
-                'message' => $exception->getMessage(),
-                'class' => get_class($exception),
+            return back()->withInput()->withErrors([
+                $failedField => 'The birthday profile could not be saved. Please try again.',
             ]);
         }
 
@@ -100,13 +73,8 @@ class BirthdayProfileController extends Controller
                 $this->removeUpload($path, $publicId);
             }
         } catch (CloudinaryImageException $exception) {
-
-            dd([
-                'delete_error' => true,
-                'message' => $exception->getMessage(),
-                'previous_message' => $exception->getPrevious()
-                    ? $exception->getPrevious()->getMessage()
-                    : null,
+            return back()->withErrors([
+                'profile_image' => 'The previous profile image could not be removed. Please try again.',
             ]);
         }
 

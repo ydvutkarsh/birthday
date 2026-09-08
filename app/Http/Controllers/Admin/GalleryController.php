@@ -31,7 +31,15 @@ class GalleryController extends Controller
         try {
             $this->save($request, $photo);
         } catch (CloudinaryImageException $exception) {
-            return back()->withInput()->withErrors(['image' => $exception->getMessage()]);
+            return back()->withInput()->withErrors([
+                'image' => 'The gallery image could not be uploaded. Please try again.',
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withInput()->withErrors([
+                'image' => 'The gallery photo could not be saved. Please try again.',
+            ]);
         }
 
         return redirect()->route('admin.gallery.index')->with('success', 'Photo uploaded.');
@@ -47,7 +55,15 @@ class GalleryController extends Controller
         try {
             $this->save($request, $gallery);
         } catch (CloudinaryImageException $exception) {
-            return back()->withInput()->withErrors(['image' => $exception->getMessage()]);
+            return back()->withInput()->withErrors([
+                'image' => 'The gallery image could not be uploaded. Please try again.',
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withInput()->withErrors([
+                'image' => 'The gallery photo could not be saved. Please try again.',
+            ]);
         }
 
         return redirect()->route('admin.gallery.index')->with('success', 'Photo updated.');
@@ -58,7 +74,15 @@ class GalleryController extends Controller
         try {
             $this->removeUpload($gallery->image, $gallery->image_public_id);
         } catch (CloudinaryImageException $exception) {
-            return back()->withErrors(['image' => $exception->getMessage()]);
+            return back()->withErrors([
+                'image' => 'The gallery image could not be removed. Please try again.',
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withErrors([
+                'image' => 'The gallery photo could not be removed. Please try again.',
+            ]);
         }
 
         $gallery->delete();

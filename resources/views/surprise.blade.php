@@ -38,7 +38,7 @@
 
     <div class="site-frame" id="top">
         <nav class="floral-nav" aria-label="Main navigation">
-            <a class="floral-logo" href="#top">O<span>♡</span>A</a>
+            <a class="floral-logo" href="#top">Om<span>♡</span>ja</a>
             <div class="floral-nav-links"><a class="active" href="#top">Home</a><a href="#timeline">Memories</a><a href="#gallery">Gallery</a><a href="#letter">Letter</a></div>
             <button class="floral-nav-toggle" type="button" data-nav-toggle aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
             <a class="floral-nav-home" href="#top" aria-label="Back to home">⌂</a>
@@ -79,7 +79,6 @@
                 <div class="floral-timeline">
                     @forelse($memories as $memory)
                         <article class="floral-timeline-item reveal"><div class="floral-timeline-dot">✦</div><div class="floral-timeline-card"><div class="floral-timeline-image">@if($memory->cover_image)<img loading="lazy" src="{{ image_url($memory->cover_image) }}" alt="{{ $memory->title }}">@else<div>✦</div>@endif</div><div><span class="floral-date">{{ $memory->memory_date?->format('d M Y') ?? 'a beautiful day' }}</span><h3>{{ $memory->title }}</h3><p>{{ $memory->short_description }}</p><button class="floral-text-button" type="button" data-bs-toggle="modal" data-bs-target="#memory-{{ $memory->id }}">Read this chapter ↗</button></div></div></article>
-                        <div class="modal fade dark-modal" id="memory-{{ $memory->id }}" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close">×</button>@if($memory->cover_image)<img src="{{ image_url($memory->cover_image) }}" alt="{{ $memory->title }}">@endif<div class="modal-body"><span class="memory-date">{{ $memory->memory_date?->format('d M Y') }}</span><h3>{{ $memory->title }}</h3><p>{!! nl2br(e($memory->full_description ?: $memory->short_description)) !!}</p></div></div></div></div>
                     @empty
                         <div class="floral-empty">✦<p>Your story is waiting for its first chapter.</p></div>
                     @endforelse
@@ -98,8 +97,20 @@
 
             <section class="floral-final"><div><p class="floral-eyebrow">08 · one last thing</p><h2>One last <em>thing...</em></h2><p>I saved the best part for the very end.</p><button class="floral-primary" type="button" data-final>Open final surprise <span>♡</span></button><div class="floral-final-message final-message" data-final-message><div class="confetti-canvas" data-confetti></div>@if($settings->final_photo)<img src="{{ image_url($settings->final_photo) }}" alt="One last memory">@endif<p>{{ $settings->final_message ?: 'You are, and will always be, my favourite person in the world.' }}</p><strong>Happy birthday, {{ $heroName }}. ♡</strong></div></div></section>
         </main>
-        <footer class="floral-footer"><div class="floral-logo">O<span>♡</span>A</div><p>{{ $settings->footer_message ?: 'Made with every little piece of my heart.' }}</p><small>just us two · {{ date('Y') }}</small></footer>
+        <footer class="floral-footer"><div class="floral-logo">Om<span>♡</span>ja</div><p>{{ $settings->footer_message ?: 'Made with every little piece of my heart.' }}</p><small>just us two · {{ date('Y') }}</small></footer>
     </div>
+
+    @foreach($memories as $memory)
+        <div class="modal fade dark-modal" id="memory-{{ $memory->id }}" tabindex="-1" aria-labelledby="memory-title-{{ $memory->id }}" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+                    @if($memory->cover_image)<img src="{{ image_url($memory->cover_image) }}" alt="{{ $memory->title }}">@endif
+                    <div class="modal-body"><span class="memory-date">{{ $memory->memory_date?->format('d M Y') }}</span><h3 id="memory-title-{{ $memory->id }}">{{ $memory->title }}</h3><p>{!! nl2br(e($memory->full_description ?: $memory->short_description)) !!}</p></div>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     @if($firstSong && $settings->enable_music)<div class="floral-player music-player" data-player data-video="{{ $firstSong->youtube_video_id }}" data-playlist="{{ $firstSong->youtube_playlist_id }}"><div class="player-meta"><span class="floral-player-thumb">♫</span><span><small>now playing</small><strong data-song-title>{{ $firstSong->title }}</strong><span class="player-time"><span data-current-time>0:00</span><span data-total-time>0:00</span></span></span></div><div class="player-controls"><button type="button" data-prev aria-label="Previous">◀</button><button class="play-button" type="button" data-play aria-label="Play">▶</button><button type="button" data-next aria-label="Next">▶</button></div><div class="player-progress"><span></span><input class="player-seek" type="range" min="0" max="0" step="0.1" value="0" data-seek aria-label="Seek through song"></div><div class="youtube-player" data-youtube aria-hidden="true"></div></div>@endif
     <div class="lightbox" data-lightbox-modal><button type="button" data-lightbox-close aria-label="Close">×</button><img data-lightbox-image alt=""><div><span data-lightbox-date></span><p data-lightbox-caption></p></div></div>

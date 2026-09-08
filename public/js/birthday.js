@@ -1,8 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.nav-brand,.brand-mark,.studio-logo').forEach((logo) => {
-    logo.innerHTML = logo.innerHTML.replace(/S(?=\s|<|$)/, 'A');
-  });
-
   const opening = document.querySelector('[data-opening]');
   if (opening) setTimeout(() => opening.classList.add('done'), 1200);
 

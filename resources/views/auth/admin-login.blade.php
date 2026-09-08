@@ -2,7 +2,7 @@
 @section('content')
 <main class="unlock-shell admin-unlock">
     <div class="unlock-panel">
-        <div class="brand-mark">O<span>♥</span>A</div><p class="eyebrow">Private studio</p>
+        <div class="brand-mark">Om<span>♡</span>ja</div><p class="eyebrow">Private studio</p>
         <h1>Welcome<br><em>back, creator.</em></h1>
         <p class="unlock-copy">Shape the little universe before it is opened.</p>
         @if ($errors->any()) <div class="unlock-error">{{ $errors->first() }}</div> @endif

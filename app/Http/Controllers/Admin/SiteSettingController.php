@@ -34,10 +34,12 @@ class SiteSettingController extends Controller
 
         $newAssets = [];
         $oldAssets = [];
+        $failedField = 'final_photo';
 
         try {
             foreach (['logo', 'favicon', 'final_photo'] as $field) {
                 if ($request->hasFile($field)) {
+                    $failedField = $field;
                     $asset = $this->upload($request->file($field), 'birthday/settings');
                     $newAssets[] = $asset;
                     $oldAssets[$field] = [$settings->{$field}, $settings->{$field.'_public_id'}];
@@ -54,10 +56,18 @@ class SiteSettingController extends Controller
         } catch (CloudinaryImageException $exception) {
             $this->cleanupUploadedAssets($newAssets);
 
-            return back()->withInput()->withErrors(['final_photo' => $exception->getMessage()]);
+            $label = str_replace('_', ' ', $failedField);
+
+            return back()->withInput()->withErrors([
+                $failedField => "The {$label} could not be uploaded. Please try again.",
+            ]);
         } catch (Throwable $exception) {
             $this->cleanupUploadedAssets($newAssets);
-            throw $exception;
+            report($exception);
+
+            return back()->withInput()->withErrors([
+                $failedField => 'The site settings could not be saved. Please try again.',
+            ]);
         }
 
         try {
@@ -65,7 +75,9 @@ class SiteSettingController extends Controller
                 $this->removeUpload($path, $publicId);
             }
         } catch (CloudinaryImageException $exception) {
-            return back()->withErrors(['final_photo' => $exception->getMessage()]);
+            return back()->withErrors([
+                'final_photo' => 'The previous site image could not be removed. Please try again.',
+            ]);
         }
 
         return back()->with('success', 'Site settings saved.');
