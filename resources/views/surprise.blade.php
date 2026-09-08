@@ -7,6 +7,7 @@
     $songs = $songs ?: collect();
     $firstSong = $songs->first();
     $coverImage = $profile->cover_image ? image_url($profile->cover_image) : asset('storage/birthday/memories/lakeside-demo.png');
+    $profileImage = $profile->profile_image ? image_url($profile->profile_image) : $coverImage;
     $heroName = $profile->nickname ?: $profile->name ?: 'My Love';
     $heroDate = $profile->birthday_date?->format('F d, Y') ?? 'A day worth celebrating';
 @endphp
@@ -55,7 +56,7 @@
                     <button class="floral-primary" type="button" data-start-story>Open our story <span>→</span></button>
                 </div>
                 <div class="hero-memory-portrait">
-                    <div class="portrait-image"><img src="{{ $coverImage }}" alt="A memory of us"></div>
+                    <div class="portrait-image"><img src="{{ $profileImage }}" alt="{{ $heroName }}"></div>
                     <div class="portrait-caption">a little world<br><em>made for you</em></div>
                 </div>
                 <div class="floral-note-card note-left"><span>our memories</span><b>✦</b><p>Little moments,<br>big memories,<br>endless love.</p></div>
