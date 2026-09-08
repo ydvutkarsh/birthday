@@ -42,7 +42,7 @@
                     </div><a class="text-link" href="{{ route('admin.gallery.index') }}">Manage ↗</a>
                 </div>
                 <div class="admin-photo-grid">@forelse($recentPhotos as $photo)<img
-                src="{{ asset('storage/' . $photo->image) }}" alt="{{ $photo->title }}">@empty<div
+                src="{{ image_url($photo->image) }}" alt="{{ $photo->title }}">@empty<div
                         class="empty-photo">No photos yet</div>@endforelse</div>
             </div>
         </div>

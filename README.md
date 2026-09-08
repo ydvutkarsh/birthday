@@ -7,13 +7,25 @@ This is a Laravel 12 + Blade + Bootstrap 5 private birthday experience. All surp
 1. Create the already-configured MySQL database named `birthday`.
 2. Confirm `.env` has `DB_DATABASE=birthday` and `DB_USERNAME=root`.
 3. Run `php artisan migrate --seed`.
-4. Run `php artisan storage:link` once for uploaded images.
+4. Run `php artisan storage:link` once for legacy/local fallback images.
 5. Serve the `public` directory through XAMPP, or run `php artisan serve`.
 
 Admin URL: `/surprise/admin`  
 Surprise URL: `/`
 
-Seeded credentials are controlled by `ADMIN_*` and `BIRTHDAY_*` values in `.env`; change them before sharing the site. Uploaded images are stored under `storage/app/public/birthday/` and exposed locally through `public/storage`.
+Seeded credentials are controlled by `ADMIN_*` and `BIRTHDAY_*` values in `.env`; change them before sharing the site. New admin-uploaded images are stored in Cloudinary, while existing local paths continue to use `public/storage` as a backward-compatible fallback.
+
+## Cloudinary uploads
+
+Add these secrets to the local `.env` and Render environment (never commit them):
+
+```text
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+After deploying the code, run `php artisan migrate --force`. This adds nullable Cloudinary public-ID columns without changing existing image paths. New uploads are organized under `birthday/memories`, `birthday/gallery`, `birthday/profile`, and `birthday/settings`.
 
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exceptions\CloudinaryImageException;
 use App\Http\Controllers\Controller;
 use App\Models\SiteSetting;
 use App\Support\HandlesUploads;
 use Illuminate\Http\Request;
+use Throwable;
 
 class SiteSettingController extends Controller
 {
@@ -30,16 +32,41 @@ class SiteSettingController extends Controller
             'final_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        foreach (['logo', 'favicon', 'final_photo'] as $field) {
-            if ($request->hasFile($field)) {
-                $this->removeUpload($settings->{$field});
-                $data[$field] = $this->upload($request->file($field), 'birthday/settings');
+        $newAssets = [];
+        $oldAssets = [];
+
+        try {
+            foreach (['logo', 'favicon', 'final_photo'] as $field) {
+                if ($request->hasFile($field)) {
+                    $asset = $this->upload($request->file($field), 'birthday/settings');
+                    $newAssets[] = $asset;
+                    $oldAssets[$field] = [$settings->{$field}, $settings->{$field.'_public_id'}];
+                    $data[$field] = $asset['url'];
+                    $data[$field.'_public_id'] = $asset['public_id'];
+                }
             }
+
+            foreach (['enable_hearts', 'enable_confetti', 'enable_music'] as $flag) {
+                $data[$flag] = $request->boolean($flag);
+            }
+
+            $settings->update($data);
+        } catch (CloudinaryImageException $exception) {
+            $this->cleanupUploadedAssets($newAssets);
+
+            return back()->withInput()->withErrors(['final_photo' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            $this->cleanupUploadedAssets($newAssets);
+            throw $exception;
         }
-        foreach (['enable_hearts', 'enable_confetti', 'enable_music'] as $flag) {
-            $data[$flag] = $request->boolean($flag);
+
+        try {
+            foreach ($oldAssets as [$path, $publicId]) {
+                $this->removeUpload($path, $publicId);
+            }
+        } catch (CloudinaryImageException $exception) {
+            return back()->withErrors(['final_photo' => $exception->getMessage()]);
         }
-        $settings->update($data);
 
         return back()->with('success', 'Site settings saved.');
     }
