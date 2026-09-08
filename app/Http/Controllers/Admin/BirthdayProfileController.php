@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BirthdayProfile;
 use App\Support\HandlesUploads;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class BirthdayProfileController extends Controller
@@ -15,12 +16,15 @@ class BirthdayProfileController extends Controller
 
     public function edit()
     {
-        return view('admin.profile', ['profile' => BirthdayProfile::firstOrCreate(['id' => 1], ['name' => 'My Love'])]);
+        return view('admin.profile', [
+            'profile' => BirthdayProfile::firstOrCreate(['id' => 1], ['name' => 'My Love'])
+        ]);
     }
 
     public function update(Request $request)
     {
         $profile = BirthdayProfile::firstOrCreate(['id' => 1], ['name' => 'My Love']);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'nickname' => ['nullable', 'string', 'max:100'],
@@ -40,9 +44,14 @@ class BirthdayProfileController extends Controller
                 if ($request->hasFile($field)) {
                     $asset = $this->upload($request->file($field), 'birthday/profile');
                     $newAssets[] = $asset;
-                    $oldAssets[$field] = [$profile->{$field}, $profile->{$field.'_public_id'}];
+
+                    $oldAssets[$field] = [
+                        $profile->{$field},
+                        $profile->{$field . '_public_id'}
+                    ];
+
                     $data[$field] = $asset['url'];
-                    $data[$field.'_public_id'] = $asset['public_id'];
+                    $data[$field . '_public_id'] = $asset['public_id'];
                 }
             }
 
@@ -50,9 +59,29 @@ class BirthdayProfileController extends Controller
         } catch (CloudinaryImageException $exception) {
             $this->cleanupUploadedAssets($newAssets);
 
-            return back()->withInput()->withErrors(['profile_image' => $exception->getMessage()]);
+            Log::error('Birthday profile upload failed in controller.', [
+                'message' => $exception->getMessage(),
+                'previous_message' => $exception->getPrevious()?->getMessage(),
+                'previous_class' => $exception->getPrevious() ? get_class($exception->getPrevious()) : null,
+            ]);
+
+            $message = $exception->getMessage();
+
+            if (config('app.debug') && $exception->getPrevious()) {
+                $message .= ' DEBUG: ' . $exception->getPrevious()->getMessage();
+            }
+
+            return back()->withInput()->withErrors([
+                'profile_image' => $message
+            ]);
         } catch (Throwable $exception) {
             $this->cleanupUploadedAssets($newAssets);
+
+            Log::error('Unexpected birthday profile update failure.', [
+                'message' => $exception->getMessage(),
+                'class' => get_class($exception),
+            ]);
+
             throw $exception;
         }
 
@@ -61,7 +90,9 @@ class BirthdayProfileController extends Controller
                 $this->removeUpload($path, $publicId);
             }
         } catch (CloudinaryImageException $exception) {
-            return back()->withErrors(['profile_image' => $exception->getMessage()]);
+            return back()->withErrors([
+                'profile_image' => $exception->getMessage()
+            ]);
         }
 
         return back()->with('success', 'Birthday profile saved.');
