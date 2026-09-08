@@ -12,9 +12,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Render captures container stderr/stdout; keep Laravel errors visible there.
-ENV LOG_STACK=stderr
-
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
