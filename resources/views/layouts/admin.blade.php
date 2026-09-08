@@ -32,6 +32,8 @@
                     href="{{ route('admin.letter.edit') }}"><span>✉</span> Love Letter</a>
                 <a class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
                     href="{{ route('admin.settings.edit') }}"><span>⚙</span> Site Settings</a>
+                <a class="{{ request()->routeIs('admin.user.*') ? 'active' : '' }}"
+                    href="{{ route('admin.user.edit') }}"><span>☆</span> Frontend Access</a>
             </nav>
             <div class="sidebar-bottom"><a href="{{ route('surprise') }}" target="_blank">View surprise ↗</a>
                 <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit">Log out</button></form>
