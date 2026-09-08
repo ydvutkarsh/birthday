@@ -14,12 +14,19 @@ class CloudinaryImageService
     private ?UploadApi $uploadApi = null;
 
     /**
+     * Upload an image to Cloudinary.
+     *
      * @return array{url: string, public_id: string}
      */
-    public function upload(UploadedFile $file, string $folder, ?string $context = null): array
-    {
+    public function upload(
+        UploadedFile $file,
+        string $folder,
+        ?string $context = null
+    ): array {
         try {
-            $response = $this->api()->upload($file->getRealPath() ?: $file->getPathname(), [
+            $path = $file->getRealPath() ?: $file->getPathname();
+
+            $response = $this->api()->upload($path, [
                 'folder' => $folder,
                 'resource_type' => 'image',
                 'unique_filename' => true,
@@ -30,25 +37,48 @@ class CloudinaryImageService
             $url = $response['secure_url'] ?? null;
             $publicId = $response['public_id'] ?? null;
 
-            if (! is_string($url) || $url === '' || ! is_string($publicId) || $publicId === '') {
-                throw new CloudinaryImageException('Cloudinary returned an incomplete image response.');
+            if (
+                ! is_string($url) ||
+                $url === '' ||
+                ! is_string($publicId) ||
+                $publicId === ''
+            ) {
+                throw new CloudinaryImageException(
+                    'Cloudinary returned an incomplete image response.'
+                );
             }
 
-            return ['url' => $url, 'public_id' => $publicId];
+            return [
+                'url' => $url,
+                'public_id' => $publicId,
+            ];
         } catch (CloudinaryImageException $exception) {
-            $this->logUploadFailure($exception, $file, $folder, $context);
+            $this->logUploadFailure(
+                $exception,
+                $file,
+                $folder,
+                $context
+            );
 
             throw $exception;
         } catch (Throwable $exception) {
-            $this->logUploadFailure($exception, $file, $folder, $context);
+            $this->logUploadFailure(
+                $exception,
+                $file,
+                $folder,
+                $context
+            );
 
             throw new CloudinaryImageException(
                 'The image could not be uploaded to Cloudinary. Please try again.',
-                previous: $exception,
+                previous: $exception
             );
         }
     }
 
+    /**
+     * Delete an image from Cloudinary.
+     */
     public function delete(?string $publicId): void
     {
         if (! filled($publicId)) {
@@ -71,14 +101,17 @@ class CloudinaryImageService
 
             throw new CloudinaryImageException(
                 'The image could not be removed from Cloudinary. The record was kept so it can be retried.',
-                previous: $exception,
+                previous: $exception
             );
         }
     }
 
+    /**
+     * Configure and return Cloudinary Upload API.
+     */
     private function api(): UploadApi
     {
-        if ($this->uploadApi) {
+        if ($this->uploadApi instanceof UploadApi) {
             return $this->uploadApi;
         }
 
@@ -86,28 +119,43 @@ class CloudinaryImageService
         $apiKey = config('services.cloudinary.api_key');
         $apiSecret = config('services.cloudinary.api_secret');
 
-        if (! filled($cloudName) || ! filled($apiKey) || ! filled($apiSecret)) {
+        if (
+            ! filled($cloudName) ||
+            ! filled($apiKey) ||
+            ! filled($apiSecret)
+        ) {
             throw new CloudinaryImageException(
                 'Cloudinary is not configured. Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.'
             );
         }
 
-        $this->uploadApi = new UploadApi(new Configuration([
+        /*
+         * Configure Cloudinary globally.
+         */
+        Configuration::instance([
             'cloud' => [
                 'cloud_name' => $cloudName,
                 'api_key' => $apiKey,
                 'api_secret' => $apiSecret,
             ],
-        ]));
+            'url' => [
+                'secure' => true,
+            ],
+        ]);
+
+        $this->uploadApi = new UploadApi();
 
         return $this->uploadApi;
     }
 
+    /**
+     * Log upload errors without exposing credentials.
+     */
     private function logUploadFailure(
         Throwable $exception,
         UploadedFile $file,
         string $folder,
-        ?string $context,
+        ?string $context
     ): void {
         Log::error('Cloudinary image upload failed.', [
             'exception_message' => $this->safeExceptionMessage($exception),
@@ -118,16 +166,29 @@ class CloudinaryImageService
             'upload_folder' => $folder,
             'uploaded_filename' => $file->getClientOriginalName(),
             'uploaded_mime_type' => $file->getMimeType(),
+            'uploaded_size' => $file->getSize(),
         ]);
     }
 
+    /**
+     * Remove sensitive Cloudinary values from exception messages.
+     */
     private function safeExceptionMessage(Throwable $exception): string
     {
         $message = $exception->getMessage();
 
-        foreach ([config('services.cloudinary.api_key'), config('services.cloudinary.api_secret')] as $secret) {
+        $secrets = [
+            config('services.cloudinary.api_key'),
+            config('services.cloudinary.api_secret'),
+        ];
+
+        foreach ($secrets as $secret) {
             if (filled($secret)) {
-                $message = str_replace($secret, '[redacted]', $message);
+                $message = str_replace(
+                    (string) $secret,
+                    '[redacted]',
+                    $message
+                );
             }
         }
 
