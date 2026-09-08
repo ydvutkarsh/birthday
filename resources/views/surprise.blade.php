@@ -6,8 +6,13 @@
     $messages = $messages ?: collect();
     $songs = $songs ?: collect();
     $firstSong = $songs->first();
-    $coverImage = $profile->cover_image ? image_url($profile->cover_image) : asset('storage/birthday/memories/lakeside-demo.png');
+    $coverImage = $profile->cover_image ? image_url($profile->cover_image) : asset('images/floral-hero-frame-v2.png');
     $profileImage = $profile->profile_image ? image_url($profile->profile_image) : $coverImage;
+    $heroPolaroids = [
+        $memories->get(0)?->cover_image ? image_url($memories->get(0)->cover_image) : $profileImage,
+        $memories->get(1)?->cover_image ? image_url($memories->get(1)->cover_image) : $coverImage,
+        $gallery->first()?->image ? image_url($gallery->first()->image) : asset('images/floral-hero-frame-v2.png'),
+    ];
     $heroName = $profile->nickname ?: $profile->name ?: 'My Love';
     $heroDate = $profile->birthday_date?->format('F d, Y') ?? 'A day worth celebrating';
 @endphp
@@ -62,9 +67,9 @@
                 <div class="floral-note-card note-left"><span>our memories</span><b>✦</b><p>Little moments,<br>big memories,<br>endless love.</p></div>
                 <div class="floral-note-card note-right"><span>My Love,</span><p>Every moment with you<br>is my favorite.</p><b>with all my love</b></div>
                 <div class="hero-polaroids">
-                    <figure><img src="{{ asset('storage/birthday/memories/lakeside-demo.png') }}" alt="A day by the lake"><figcaption>you &amp; me</figcaption></figure>
-                    <figure><img src="{{ asset('storage/birthday/memories/cafe-demo.png') }}" alt="Our cafe ritual"><figcaption>beautiful moments</figcaption></figure>
-                    <figure><img src="{{ asset('storage/birthday/memories/rain-demo.png') }}" alt="Dancing in the rain"><figcaption>always us</figcaption></figure>
+                    <figure><img src="{{ $heroPolaroids[0] }}" alt="A memory of us"><figcaption>you &amp; me</figcaption></figure>
+                    <figure><img src="{{ $heroPolaroids[1] }}" alt="A beautiful moment"><figcaption>beautiful moments</figcaption></figure>
+                    <figure><img src="{{ $heroPolaroids[2] }}" alt="Always us"><figcaption>always us</figcaption></figure>
                 </div>
                 <a class="floral-scroll" href="#intro">scroll to begin <span>↓</span></a>
             </section>
@@ -75,7 +80,7 @@
             </section>
 
             <section id="timeline" class="floral-section floral-story">
-                <div class="floral-heading"><p class="floral-eyebrow">02 · the chapters</p><h2>Our story, <em>so far.</em></h2><p>Every ordinary moment became something I wanted to remember.</p></div>
+                <div class="floral-heading"><p class="floral-eyebrow">{{ $settings->story_eyebrow ?: '02 · the chapters' }}</p><h2>{{ $settings->story_title ?: 'Our story,' }} <em>{{ $settings->story_title_emphasis ?: 'so far.' }}</em></h2><p>{{ $settings->story_description ?: 'Every ordinary moment became something I wanted to remember.' }}</p></div>
                 <div class="floral-timeline">
                     @forelse($memories as $memory)
                         <article class="floral-timeline-item reveal"><div class="floral-timeline-dot">✦</div><div class="floral-timeline-card"><div class="floral-timeline-image">@if($memory->cover_image)<img loading="lazy" src="{{ image_url($memory->cover_image) }}" alt="{{ $memory->title }}">@else<div>✦</div>@endif</div><div><span class="floral-date">{{ $memory->memory_date?->format('d M Y') ?? 'a beautiful day' }}</span><h3>{{ $memory->title }}</h3><p>{{ $memory->short_description }}</p><button class="floral-text-button" type="button" data-bs-toggle="modal" data-bs-target="#memory-{{ $memory->id }}">Read this chapter ↗</button></div></div></article>

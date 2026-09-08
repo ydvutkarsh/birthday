@@ -277,3 +277,30 @@
 @media (max-width: 760px) {
   .floral-player .player-progress { left: .85rem; right: 7.8rem; bottom: 8px; }
 }
+
+/* Responsive story chapters and native Bootstrap memory modals */
+.floral-timeline-card { min-width: 0; }
+.floral-timeline-card > div:last-child { min-width: 0; }
+.floral-timeline-card h3, .floral-timeline-card p { overflow-wrap: anywhere; }
+.floral-text-button { display: inline-flex; align-items: center; min-height: 44px; }
+.dark-modal .modal-dialog { width: auto; max-width: min(720px, calc(100vw - 2rem)); }
+.dark-modal .modal-content { max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); overflow-y: auto; }
+.dark-modal .modal-content > img { display: block; max-height: min(42vh, 350px); }
+.dark-modal .modal-body { overflow-wrap: anywhere; }
+.modal-close { display: grid; width: 2.75rem; height: 2.75rem; place-items: center; padding: 0; line-height: 1; pointer-events: auto; }
+
+@media (max-width: 760px) {
+  .floral-timeline { gap: 1.35rem; }
+  .floral-timeline-card { grid-template-columns: minmax(0, 1fr); gap: .9rem; padding: .75rem; }
+  .floral-timeline-image, .floral-timeline-image img { width: 100%; height: clamp(160px, 48vw, 220px); }
+  .floral-timeline-card h3 { font-size: clamp(1.65rem, 8vw, 2.25rem); line-height: 1; }
+  .floral-timeline-card p { font-size: .86rem; line-height: 1.65; }
+  .floral-timeline-card:hover { transform: none; box-shadow: none; }
+  .dark-modal .modal-dialog { max-width: none; min-height: calc(100% - 1rem); margin: .5rem; }
+  .dark-modal .modal-content { max-height: calc(100vh - 1rem); max-height: calc(100dvh - 1rem); }
+  .dark-modal .modal-content > img { max-height: 32vh; }
+  .dark-modal .modal-body { padding: 1.25rem 1rem 1.5rem; }
+  .dark-modal h3 { font-size: clamp(1.8rem, 8vw, 2.4rem); line-height: 1; }
+  .dark-modal p { font-size: .9rem; line-height: 1.7; }
+  .modal-close { position: sticky; top: .5rem; align-self: flex-end; margin: .5rem .5rem -2.75rem 0; }
+}
