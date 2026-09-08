@@ -27,6 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=Italianno&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/birthday.css') }}">
     <link rel="stylesheet" href="{{ asset('css/floral.css') }}">
 </head>
@@ -120,8 +121,8 @@
     @if($firstSong && $settings->enable_music)<div class="floral-player music-player" data-player data-video="{{ $firstSong->youtube_video_id }}" data-playlist="{{ $firstSong->youtube_playlist_id }}"><div class="player-meta"><span class="floral-player-thumb">♫</span><span><small>now playing</small><strong data-song-title>{{ $firstSong->title }}</strong><span class="player-time"><span data-current-time>0:00</span><span data-total-time>0:00</span></span></span></div><div class="player-controls"><button type="button" data-prev aria-label="Previous">◀</button><button class="play-button" type="button" data-play aria-label="Play">▶</button><button type="button" data-next aria-label="Next">▶</button></div><div class="player-progress"><span></span><input class="player-seek" type="range" min="0" max="0" step="0.1" value="0" data-seek aria-label="Seek through song"></div><div class="youtube-player" data-youtube aria-hidden="true"></div></div>@endif
     <div class="lightbox" data-lightbox-modal><button type="button" data-lightbox-close aria-label="Close">×</button><img data-lightbox-image alt=""><div><span data-lightbox-date></span><p data-lightbox-caption></p></div></div>
     <script>window.storySongs = @json($songs->map(fn($song) => ['title' => $song->title, 'video' => $song->youtube_video_id, 'playlist' => $song->youtube_playlist_id])->values());</script>
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/birthday.js') }}"></script>
+    <script async src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>

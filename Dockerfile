@@ -25,6 +25,5 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chmod -R 775 storage bootstrap/cache
 
 CMD php artisan migrate --force \
-    && php artisan db:seed --class=UserSeeder --force \
     && (php artisan storage:link || true) \
     && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}

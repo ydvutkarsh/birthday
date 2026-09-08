@@ -18,6 +18,78 @@ document.addEventListener('DOMContentLoaded', () => {
     navToggle?.setAttribute('aria-label', 'Open navigation');
   }));
 
+  const memoryTriggers = [...document.querySelectorAll('[data-bs-toggle="modal"][data-bs-target^="#memory-"]')];
+  const memoryModals = memoryTriggers.map((trigger) => {
+    const targetSelector = trigger.getAttribute('data-bs-target');
+    return {
+      trigger,
+      modal: targetSelector ? document.querySelector(targetSelector) : null,
+    };
+  }).filter(({ modal }) => modal);
+
+  if (memoryModals.length) {
+    const bootstrapAvailable = Boolean(window.bootstrap?.Modal);
+    let fallbackBackdrop = null;
+    let activeFallbackModal = null;
+    let activeFallbackTrigger = null;
+
+    const closeFallbackModal = (modal) => {
+      if (!modal) return;
+      modal.classList.remove('show', 'memory-modal-fallback-open');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.removeAttribute('aria-modal');
+      modal.style.display = 'none';
+      fallbackBackdrop?.remove();
+      fallbackBackdrop = null;
+      activeFallbackModal = null;
+      document.body.classList.remove('modal-open');
+      activeFallbackTrigger?.focus();
+      activeFallbackTrigger = null;
+    };
+
+    const openFallbackModal = (modal, trigger) => {
+      closeFallbackModal(activeFallbackModal);
+      activeFallbackModal = modal;
+      activeFallbackTrigger = trigger;
+      fallbackBackdrop = document.createElement('div');
+      fallbackBackdrop.className = 'memory-modal-fallback-backdrop';
+      fallbackBackdrop.addEventListener('click', () => closeFallbackModal(modal));
+      document.body.append(fallbackBackdrop);
+      modal.classList.add('show', 'memory-modal-fallback-open');
+      modal.style.display = 'block';
+      modal.removeAttribute('aria-hidden');
+      modal.setAttribute('aria-modal', 'true');
+      document.body.classList.add('modal-open');
+      modal.querySelector('[data-bs-dismiss="modal"]')?.focus();
+    };
+
+    memoryModals.forEach(({ trigger, modal }) => {
+      const instance = bootstrapAvailable
+        ? window.bootstrap.Modal.getOrCreateInstance(modal, { backdrop: true, keyboard: true, focus: true })
+        : null;
+
+      trigger.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (instance) instance.show();
+        else openFallbackModal(modal, trigger);
+      });
+
+      if (!bootstrapAvailable) {
+        modal.querySelector('[data-bs-dismiss="modal"]')?.addEventListener('click', () => closeFallbackModal(modal));
+        modal.addEventListener('click', (event) => {
+          if (event.target === modal) closeFallbackModal(modal);
+        });
+      }
+    });
+
+    if (!bootstrapAvailable) {
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeFallbackModal(activeFallbackModal);
+      });
+    }
+  }
+
   const navSections = [...document.querySelectorAll('main section[id]')];
   if (navSections.length) {
     const updateActiveNav = () => {
