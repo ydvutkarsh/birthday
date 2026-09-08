@@ -8,6 +8,12 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     && docker-php-ext-install curl pdo_mysql zip
 
+# Allow image uploads larger than PHP's default limit
+RUN echo "upload_max_filesize=10M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size=12M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "memory_limit=256M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "max_execution_time=120" >> /usr/local/etc/php/conf.d/uploads.ini
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
