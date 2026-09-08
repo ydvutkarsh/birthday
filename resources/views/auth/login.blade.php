@@ -3,7 +3,7 @@
 <main class="unlock-shell">
     <div class="unlock-orbit orbit-one"></div><div class="unlock-orbit orbit-two"></div>
     <div class="unlock-panel">
-        <div class="brand-mark">Om<span>♡</span>ja</div>
+        <div class="brand-mark">Omja<span>♡</span></div>
         <p class="eyebrow">A private little universe</p>
         <h1>There’s something<br><em>waiting for you.</em></h1>
         <p class="unlock-copy">This is a little corner of the world made just for you. Enter your details to unlock it.</p>

@@ -43,7 +43,7 @@
 
     <div class="site-frame" id="top">
         <nav class="floral-nav" aria-label="Main navigation">
-            <a class="floral-logo" href="#top">Om<span>♡</span>ja</a>
+            <a class="floral-logo" href="#top">Omja<span>♡</span></a>
             <div class="floral-nav-links"><a class="active" href="#top">Home</a><a href="#timeline">Memories</a><a href="#gallery">Gallery</a><a href="#letter">Letter</a></div>
             <button class="floral-nav-toggle" type="button" data-nav-toggle aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
             <a class="floral-nav-home" href="#top" aria-label="Back to home">⌂</a>
@@ -102,16 +102,16 @@
 
             <section class="floral-final"><div><p class="floral-eyebrow">08 · one last thing</p><h2>One last <em>thing...</em></h2><p>I saved the best part for the very end.</p><button class="floral-primary" type="button" data-final>Open final surprise <span>♡</span></button><div class="floral-final-message final-message" data-final-message><div class="confetti-canvas" data-confetti></div>@if($settings->final_photo)<img src="{{ image_url($settings->final_photo) }}" alt="One last memory">@endif<p>{{ $settings->final_message ?: 'You are, and will always be, my favourite person in the world.' }}</p><strong>Happy birthday, {{ $heroName }}. ♡</strong></div></div></section>
         </main>
-        <footer class="floral-footer"><div class="floral-logo">Om<span>♡</span>ja</div><p>{{ $settings->footer_message ?: 'Made with every little piece of my heart.' }}</p><small>just us two · {{ date('Y') }}</small></footer>
+        <footer class="floral-footer"><div class="floral-logo">Omja<span>♡</span></div><p>{{ $settings->footer_message ?: 'Made with every little piece of my heart.' }}</p><small>just us two · {{ date('Y') }}</small></footer>
     </div>
 
     @foreach($memories as $memory)
-        <div class="modal fade dark-modal" id="memory-{{ $memory->id }}" tabindex="-1" aria-labelledby="memory-title-{{ $memory->id }}" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+        <div class="modal fade dark-modal" id="memory-{{ $memory->id }}" tabindex="-1" aria-labelledby="memory-title-{{ $memory->id }}" aria-describedby="memory-description-{{ $memory->id }}" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                    <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+                    <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
                     @if($memory->cover_image)<img src="{{ image_url($memory->cover_image) }}" alt="{{ $memory->title }}">@endif
-                    <div class="modal-body"><span class="memory-date">{{ $memory->memory_date?->format('d M Y') }}</span><h3 id="memory-title-{{ $memory->id }}">{{ $memory->title }}</h3><p>{!! nl2br(e($memory->full_description ?: $memory->short_description)) !!}</p></div>
+                    <div class="modal-body"><span class="memory-date">{{ $memory->memory_date?->format('d M Y') }}</span><h3 id="memory-title-{{ $memory->id }}">{{ $memory->title }}</h3><p id="memory-description-{{ $memory->id }}">{!! nl2br(e($memory->full_description ?: $memory->short_description)) !!}</p></div>
                 </div>
             </div>
         </div>

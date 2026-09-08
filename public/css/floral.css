@@ -284,10 +284,10 @@
 .floral-timeline-card h3, .floral-timeline-card p { overflow-wrap: anywhere; }
 .floral-text-button { display: inline-flex; align-items: center; min-height: 44px; }
 .dark-modal .modal-dialog { width: auto; max-width: min(720px, calc(100vw - 2rem)); }
-.dark-modal .modal-content { max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); overflow-y: auto; }
-.dark-modal .modal-content > img { display: block; max-height: min(42vh, 350px); }
-.dark-modal .modal-body { overflow-wrap: anywhere; }
-.modal-close { display: grid; width: 2.75rem; height: 2.75rem; place-items: center; padding: 0; line-height: 1; pointer-events: auto; }
+.dark-modal .modal-content { display: flex; max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); overflow: hidden; border: 1px solid rgba(240,196,124,.28); border-radius: 16px; box-shadow: 0 24px 70px rgba(28,18,8,.4); }
+.dark-modal .modal-content > img { display: block; flex: 0 0 auto; max-height: min(42vh, 350px); }
+.dark-modal .modal-body { min-height: 0; overflow-y: auto; overflow-wrap: anywhere; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-color: rgba(222,177,108,.65) rgba(255,255,255,.08); }
+.modal-close { display: grid; width: 2.75rem; height: 2.75rem; place-items: center; padding: 0; line-height: 1; pointer-events: auto; border: 1px solid rgba(255,255,255,.24); border-radius: 50%; background: rgba(34,23,12,.78); box-shadow: 0 5px 14px rgba(0,0,0,.2); }
 
 @media (max-width: 760px) {
   .floral-timeline { gap: 1.35rem; }
@@ -297,7 +297,7 @@
   .floral-timeline-card p { font-size: .86rem; line-height: 1.65; }
   .floral-timeline-card:hover { transform: none; box-shadow: none; }
   .dark-modal .modal-dialog { max-width: none; min-height: calc(100% - 1rem); margin: .5rem; }
-  .dark-modal .modal-content { max-height: calc(100vh - 1rem); max-height: calc(100dvh - 1rem); }
+  .dark-modal .modal-content { max-height: calc(100vh - 1rem); max-height: calc(100dvh - 1rem); border-radius: 14px; }
   .dark-modal .modal-content > img { max-height: 32vh; }
   .dark-modal .modal-body { padding: 1.25rem 1rem 1.5rem; }
   .dark-modal h3 { font-size: clamp(1.8rem, 8vw, 2.4rem); line-height: 1; }
